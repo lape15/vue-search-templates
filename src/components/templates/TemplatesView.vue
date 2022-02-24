@@ -2,11 +2,14 @@
 import { ref, onMounted, computed } from "vue";
 import OneTemplate from "./OneTemplate.vue";
 import InputBox from "../search/InputBox.vue";
+import NotFound from "../search/NotFound.vue";
+import DropdownTab from "../search/DropdownTab.vue";
 import axios from "axios";
 
 const templates = ref([]);
 const loading = ref(false);
 const defaultTemps = ref([]);
+const searchValue = ref("");
 async function fetchTemplates() {
   loading.value = true;
   try {
@@ -24,23 +27,38 @@ onMounted(() => {
   fetchTemplates();
 });
 
-const handleCreate = (event, searchVal) => {
-  if (event !== "") {
+const handleCreate = (event, param) => {
+  if (event !== "" && param === "name") {
     return (templates.value = templates.value.filter(
-      (temp) => temp.name.toLowerCase().indexOf(event.toLowerCase()) !== -1
+      (temp) =>
+        temp.name.toLowerCase().indexOf(searchValue.value.toLowerCase()) !== -1
     ));
+  }
+  if (event !== "All" && param === "categories") {
+    searchValue.value = "";
+    try {
+      return (templates.value = defaultTemps.value.filter((template) =>
+        template.category.includes(event)
+      ));
+    } catch (err) {
+      console.error(err, "error");
+    }
   }
   templates.value = defaultTemps.value;
 };
 </script>
 
 <template>
-  <InputBox @search-templates="handleCreate" />
+  <InputBox @search-templates="handleCreate" v-model="searchValue" />
+  <DropdownTab @search-templates="handleCreate" />
   <p v-if="loading">Loading....</p>
   <div class="templates">
     <div v-for="template in templates" :key="template.name">
       <OneTemplate :template="template" />
     </div>
+    <NotFound v-if="templates.length === 0 && !loading">
+      Templates unavailable...
+    </NotFound>
   </div>
 </template>
 

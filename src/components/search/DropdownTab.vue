@@ -1,4 +1,5 @@
 <script>
+// const categories = ["Health", "E-commerce", "Education"];
 export default {
   props: {
     methods: { type: Function },
@@ -6,12 +7,13 @@ export default {
   },
   data() {
     return {
-      searchValue: "",
+      categoryVal: "All",
+      categories: ["All", "Health", "E-commerce", "Education"],
     };
   },
   methods: {
-    logChange(val) {
-      this.$emit("search-templates", val, "name");
+    logChange() {
+      this.$emit("search-templates", this.categoryVal, "categories");
     },
   },
 };
@@ -19,15 +21,11 @@ export default {
 
 <template>
   <div class="search">
-    <input
-      v-model="searchValue"
-      placeholder="Type here"
-      @input="
-        $emit('update:modelValue', $event.target.value);
-        logChange($event.target.value);
-      "
-    />
-    />
+    <select v-model="categoryVal" @change="logChange">
+      <option v-for="category in categories" :key="category">
+        {{ category }}
+      </option>
+    </select>
   </div>
 </template>
 
@@ -38,7 +36,7 @@ export default {
   flex-wrap: nowrap;
   padding: 20px;
 }
-input {
+select {
   /* width: 100%;
    */
   flex: auto;
