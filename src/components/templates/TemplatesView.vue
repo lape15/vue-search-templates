@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import OneTemplate from "./OneTemplate.vue";
 import InputBox from "../search/InputBox.vue";
 import NotFound from "../search/NotFound.vue";
@@ -10,6 +10,12 @@ const templates = ref([]);
 const loading = ref(false);
 const defaultTemps = ref([]);
 const searchValue = ref("");
+const page = ref(1);
+const cardsPerPage = ref(18);
+const indexOfLastCard = ref(page.value * cardsPerPage.value);
+const tempRef = ref();
+
+const indexOfFirstCard = ref(indexOfLastCard.value - cardsPerPage.value);
 async function fetchTemplates() {
   loading.value = true;
   try {
@@ -17,15 +23,24 @@ async function fetchTemplates() {
       "https://front-end-task-dot-fpls-dev.uc.r.appspot.com/api/v1/public/task_templates"
     );
     loading.value = false;
-    templates.value = data.data.slice(1, 20);
-    defaultTemps.value = data.data.slice(1, 20);
+    defaultTemps.value = data.data;
+    templates.value = data.data;
   } catch (err) {
-    console.error(err, "error hear");
+    console.error(err, "error here");
   }
 }
 onMounted(() => {
   fetchTemplates();
 });
+
+function changePage(newPage) {
+  page.value = newPage;
+  // window.scrollTo(0, 0);
+  const temp = document.querySelector(".templates");
+  temp.scrollIntoView({
+    behavior: "smooth",
+  });
+}
 
 const handleCreate = (event, param) => {
   if (event !== "" && param === "name") {
@@ -46,23 +61,46 @@ const handleCreate = (event, param) => {
   }
   templates.value = defaultTemps.value;
 };
+watch(page, (newPage) => {
+  indexOfLastCard.value = newPage * cardsPerPage.value;
+  indexOfFirstCard.value = indexOfLastCard.value - cardsPerPage.value;
+});
 </script>
 
 <template>
-  <InputBox @search-templates="handleCreate" v-model="searchValue" />
-  <DropdownTab @search-templates="handleCreate" />
+  <div class="search-container">
+    <InputBox @search-templates="handleCreate" v-model="searchValue" />
+    <DropdownTab @search-templates="handleCreate" />
+  </div>
   <p v-if="loading">Loading....</p>
-  <div class="templates">
-    <div v-for="template in templates" :key="template.name">
+  <div class="templates" ref="tempRef">
+    <div
+      v-for="template in templates.slice(indexOfFirstCard, indexOfLastCard)"
+      :key="template.name"
+    >
       <OneTemplate :template="template" />
     </div>
     <NotFound v-if="templates.length === 0 && !loading">
       Templates unavailable...
     </NotFound>
   </div>
+  <div v-if="templates.length > 0">
+    <button @click="changePage(page - 1)">previous</button>
+    <button>
+      {{ page }}
+    </button>
+    <span>
+      of
+      {{ (templates.length / cardsPerPage).toFixed() }}
+    </span>
+    <button @click="changePage(page + 1)">next</button>
+  </div>
 </template>
 
 <style scoped>
+.search-container {
+  display: flex;
+}
 .templates {
   display: flex;
   flex-wrap: wrap;

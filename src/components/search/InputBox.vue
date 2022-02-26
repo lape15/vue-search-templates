@@ -27,7 +27,7 @@ export default {
         logChange($event.target.value);
       "
     />
-    />
+    
   </div>
 </template>
 
@@ -37,6 +37,7 @@ export default {
   display: flex;
   flex-wrap: nowrap;
   padding: 20px;
+  margin: 0 auto;
 }
 input {
   /* width: 100%;

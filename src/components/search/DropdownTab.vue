@@ -35,6 +35,7 @@ export default {
   display: flex;
   flex-wrap: nowrap;
   padding: 20px;
+  margin: 0 auto;
 }
 select {
   /* width: 100%;
