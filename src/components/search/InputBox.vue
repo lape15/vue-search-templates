@@ -27,7 +27,6 @@ export default {
         logChange($event.target.value);
       "
     />
-    
   </div>
 </template>
 
