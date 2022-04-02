@@ -23,8 +23,8 @@ async function fetchTemplates() {
       "https://front-end-task-dot-fpls-dev.uc.r.appspot.com/api/v1/public/task_templates"
     );
     loading.value = false;
-    defaultTemps.value = data.data;
-    templates.value = data.data;
+    defaultTemps.value = [...data.data];
+    templates.value = [...data.data];
   } catch (err) {
     console.error(err, "error here");
   }
@@ -60,30 +60,24 @@ const handleCreate = (event, param) => {
     }
   }
   if (param === "sort" && event === "Descending") {
-    templates.value = templates.value.sort((a, b) =>
-      b.name.localeCompare(a.name)
-    );
+    return templates.value.sort((a, b) => b.name.localeCompare(a.name));
   } else if (param === "sort" && event === "Ascending") {
-    templates.value = templates.value.sort((a, b) =>
+    return (templates.value = templates.value.sort((a, b) =>
       a.name.localeCompare(b.name)
-    );
+    ));
   }
 
   if (param === "dateSort" && event === "Ascending") {
-    templates.value = templates.value.sort(
+    return templates.value.sort(
       (a, b) => new Date(a.created).getTime() - new Date(b.created).getTime()
     );
-  }
-  if (param === "dateSort" && event === "Default") {
-    templates.value = defaultTemps.value;
   } else if (param === "dateSort" && event === "Descending") {
     templates.value = templates.value.sort(
       (a, b) => new Date(b.created).getTime() - new Date(a.created).getTime()
     );
   }
   templates.value = defaultTemps.value;
-
-  console.log(defaultTemps.value, templates.value, "HAHAHAH");
+  console.log(defaultTemps.value[0], templates.value[0], "HAHAHAH");
 };
 watch(page, (newPage) => {
   indexOfLastCard.value = newPage * cardsPerPage.value;
@@ -97,8 +91,8 @@ watch(page, (newPage) => {
     <DropdownTab @search-templates="handleCreate" />
   </div>
 
-  <p v-if="loading">Loading....</p>
-  <div>{{ templates.length }}Found</div>
+  <p v-if="loading" class="p">Loading....</p>
+  <div class="p" v-if="templates.length">{{ templates.length }}Found</div>
   <div class="templates" ref="tempRef">
     <div
       v-for="template in templates.slice(indexOfFirstCard, indexOfLastCard)"
@@ -124,6 +118,11 @@ watch(page, (newPage) => {
 </template>
 
 <style scoped>
+.p {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+}
 .search-container {
   display: flex;
   padding: 20px;
